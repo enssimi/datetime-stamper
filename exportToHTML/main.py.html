@@ -1,0 +1,131 @@
+<html>
+<head>
+<title>main.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #808080;}
+.s3 { color: #6a8759;}
+.s4 { color: #6897bb;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">os</span>
+<span class="s0">import </span><span class="s1">piexif</span>
+<span class="s0">from </span><span class="s1">datetime </span><span class="s0">import </span><span class="s1">datetime</span>
+<span class="s0">from </span><span class="s1">PIL </span><span class="s0">import </span><span class="s1">Image</span><span class="s0">, </span><span class="s1">ImageDraw</span><span class="s0">, </span><span class="s1">ImageFont</span>
+<span class="s0">import </span><span class="s1">tkinter </span><span class="s0">as </span><span class="s1">tk</span>
+<span class="s0">from </span><span class="s1">tkinter </span><span class="s0">import </span><span class="s1">filedialog</span>
+
+<span class="s2"># define a function to add a date/time stamp to the selected photo</span>
+<span class="s0">def </span><span class="s1">add_timestamp():</span>
+    <span class="s2"># get the path to the photo file</span>
+    <span class="s1">photo_path = filedialog.askopenfilename(title=</span><span class="s3">&quot;Select photo&quot;</span><span class="s1">)</span>
+
+    <span class="s2"># read the EXIF metadata from the photo</span>
+    <span class="s0">try</span><span class="s1">:</span>
+        <span class="s1">exif_dict = piexif.load(photo_path)</span>
+    <span class="s0">except </span><span class="s1">piexif._exceptions.InvalidImageDataError:</span>
+        <span class="s1">error_label.config(text=</span><span class="s3">&quot;Error: Invalid image data.&quot;</span><span class="s1">)</span>
+        <span class="s0">return</span>
+
+    <span class="s2"># extract the date and time information from the EXIF metadata</span>
+    <span class="s0">if </span><span class="s3">&quot;Exif&quot; </span><span class="s0">in </span><span class="s1">exif_dict </span><span class="s0">and </span><span class="s1">piexif.ExifIFD.DateTimeOriginal </span><span class="s0">in </span><span class="s1">exif_dict[</span><span class="s3">&quot;Exif&quot;</span><span class="s1">]:</span>
+        <span class="s1">date_time = exif_dict[</span><span class="s3">&quot;Exif&quot;</span><span class="s1">][piexif.ExifIFD.DateTimeOriginal].decode(</span><span class="s3">&quot;utf-8&quot;</span><span class="s1">)</span>
+    <span class="s0">else</span><span class="s1">:</span>
+        <span class="s1">error_label.config(text=</span><span class="s3">&quot;Error: No date/time information found in photo metadata.&quot;</span><span class="s1">)</span>
+        <span class="s0">return</span>
+
+    <span class="s2"># convert the date and time information to a datetime object</span>
+    <span class="s1">date_time_obj = datetime.strptime(date_time</span><span class="s0">, </span><span class="s3">&quot;%Y:%m:%d %H:%M:%S&quot;</span><span class="s1">)</span>
+
+    <span class="s2"># format the date and time information as a string</span>
+    <span class="s1">date_time_str = date_time_obj.strftime(</span><span class="s3">&quot;%Y-%m-%d %H:%M:%S&quot;</span><span class="s1">)</span>
+
+    <span class="s2"># specify the font and font size for the date/time stamp</span>
+    <span class="s1">font = ImageFont.truetype(</span><span class="s3">&quot;arial.ttf&quot;</span><span class="s0">, </span><span class="s4">36</span><span class="s1">)</span>
+    <span class="s2"># specify the position for the date/time stamp (down left, down right, up left, or up right)</span>
+    <span class="s1">position = position_var.get()</span>
+
+    <span class="s2"># open the photo using the PIL library</span>
+    <span class="s0">try</span><span class="s1">:</span>
+        <span class="s1">photo = Image.open(photo_path)</span>
+    <span class="s0">except </span><span class="s1">OSError:</span>
+        <span class="s1">error_label.config(text=</span><span class="s3">&quot;Error: Unable to open photo file.&quot;</span><span class="s1">)</span>
+        <span class="s0">return</span>
+
+    <span class="s2"># create a drawing object for the photo</span>
+    <span class="s1">draw = ImageDraw.Draw(photo)</span>
+
+    <span class="s2"># get the width and height of the photo</span>
+    <span class="s1">width</span><span class="s0">, </span><span class="s1">height = photo.size</span>
+
+    <span class="s2"># get the width and height of the date/time stamp text</span>
+    <span class="s1">text_width</span><span class="s0">, </span><span class="s1">text_height = draw.textsize(date_time_str</span><span class="s0">, </span><span class="s1">font)</span>
+
+    <span class="s2"># specify the position for the date/time stamp based on the chosen corner</span>
+    <span class="s0">if </span><span class="s1">position == </span><span class="s3">&quot;down_right&quot;</span><span class="s1">:</span>
+        <span class="s1">x = width - text_width - </span><span class="s4">10</span>
+        <span class="s1">y = height - text_height - </span><span class="s4">10</span>
+    <span class="s0">elif </span><span class="s1">position == </span><span class="s3">&quot;up_left&quot;</span><span class="s1">:</span>
+        <span class="s1">x = </span><span class="s4">10</span>
+        <span class="s1">y = </span><span class="s4">10</span>
+    <span class="s0">elif </span><span class="s1">position == </span><span class="s3">&quot;up_right&quot;</span><span class="s1">:</span>
+        <span class="s1">x = width - text_width - </span><span class="s4">10</span>
+        <span class="s1">y = </span><span class="s4">10</span>
+    <span class="s0">else</span><span class="s1">:</span>
+        <span class="s1">x = </span><span class="s4">10</span>
+        <span class="s1">y = height - text_height - </span><span class="s4">10</span>
+
+    <span class="s2"># draw the date/time stamp on the photo</span>
+    <span class="s1">draw.text((x</span><span class="s0">, </span><span class="s1">y)</span><span class="s0">, </span><span class="s1">date_time_str</span><span class="s0">, </span><span class="s1">fill=</span><span class="s3">&quot;white&quot;</span><span class="s0">, </span><span class="s1">font=font)</span>
+
+    <span class="s2"># save the modified photo</span>
+    <span class="s1">photo.save(photo_path)</span>
+
+    <span class="s2"># update the success label</span>
+    <span class="s1">success_label.config(text=</span><span class="s3">&quot;Date/Time stamp added to photo successfully.&quot;</span><span class="s1">)</span>
+
+<span class="s2"># create a tkinter window</span>
+<span class="s1">window = tk.Tk()</span>
+<span class="s1">window.title(</span><span class="s3">&quot;Add Date/Time Stamp to Photo&quot;</span><span class="s1">)</span>
+
+<span class="s2"># create a button to select the photo</span>
+<span class="s1">select_button = tk.Button(window</span><span class="s0">, </span><span class="s1">text=</span><span class="s3">&quot;Select Photo&quot;</span><span class="s0">, </span><span class="s1">command=add_timestamp)</span>
+<span class="s1">select_button.pack(pady=</span><span class="s4">10</span><span class="s1">)</span>
+
+<span class="s2"># create a label to display errors</span>
+<span class="s1">error_label = tk.Label(window</span><span class="s0">, </span><span class="s1">fg=</span><span class="s3">&quot;red&quot;</span><span class="s1">)</span>
+<span class="s1">error_label.pack()</span>
+
+<span class="s2"># create a label to display success message</span>
+<span class="s1">success_label = tk.Label(window</span><span class="s0">, </span><span class="s1">fg=</span><span class="s3">&quot;green&quot;</span><span class="s1">)</span>
+<span class="s1">success_label.pack()</span>
+
+<span class="s2"># create a radio button to select the position for the date/time stamp</span>
+<span class="s1">position_var = tk.StringVar(value=</span><span class="s3">&quot;down_right&quot;</span><span class="s1">)</span>
+
+<span class="s1">position_frame = tk.Frame(window)</span>
+<span class="s1">position_frame.pack()</span>
+
+<span class="s1">down_right_rb = tk.Radiobutton(position_frame</span><span class="s0">, </span><span class="s1">text=</span><span class="s3">&quot;Bottom Right&quot;</span><span class="s0">, </span><span class="s1">variable=position_var</span><span class="s0">, </span><span class="s1">value=</span><span class="s3">&quot;down_right&quot;</span><span class="s1">)</span>
+<span class="s1">down_right_rb.pack(side=</span><span class="s3">&quot;left&quot;</span><span class="s1">)</span>
+
+<span class="s1">up_right_rb = tk.Radiobutton(position_frame</span><span class="s0">, </span><span class="s1">text=</span><span class="s3">&quot;Top Right&quot;</span><span class="s0">, </span><span class="s1">variable=position_var</span><span class="s0">, </span><span class="s1">value=</span><span class="s3">&quot;up_right&quot;</span><span class="s1">)</span>
+<span class="s1">up_right_rb.pack(side=</span><span class="s3">&quot;left&quot;</span><span class="s1">)</span>
+
+<span class="s1">up_left_rb = tk.Radiobutton(position_frame</span><span class="s0">, </span><span class="s1">text=</span><span class="s3">&quot;Top Left&quot;</span><span class="s0">, </span><span class="s1">variable=position_var</span><span class="s0">, </span><span class="s1">value=</span><span class="s3">&quot;up_left&quot;</span><span class="s1">)</span>
+<span class="s1">up_left_rb.pack(side=</span><span class="s3">&quot;left&quot;</span><span class="s1">)</span>
+
+<span class="s1">down_left_rb = tk.Radiobutton(position_frame</span><span class="s0">, </span><span class="s1">text=</span><span class="s3">&quot;Bottom Left&quot;</span><span class="s0">, </span><span class="s1">variable=position_var</span><span class="s0">, </span><span class="s1">value=</span><span class="s3">&quot;down_left&quot;</span><span class="s1">)</span>
+<span class="s1">down_left_rb.pack(side=</span><span class="s3">&quot;left&quot;</span><span class="s1">)</span>
+
+<span class="s1">window.mainloop()</span></pre>
+</body>
+</html>
