@@ -16,7 +16,7 @@
     <p>
       To run the program from the command line, navigate to the directory containing the program files and run the following command:
     </p>
-    <pre><code>python datetimestamper.py</code></pre>
+    <pre><code>python main.py</code></pre>
     <p>
       To use the graphical user interface, run the following command instead:
     </p>
